@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Compartir ubicación</title>
   <style>
     body {
@@ -12,27 +12,41 @@
       background-color: #f5f5f5;
     }
     h1 {
-      font-size: 28px;
-      margin-bottom: 20px;
+      font-size: 36px;  /* 标题更大 */
+      margin-bottom: 30px;
     }
     input, button {
-      font-size: 18px;
-      padding: 10px;
-      margin: 10px;
-      width: 80%;
-      max-width: 300px;
+      font-size: 22px;  /* 输入框和按钮字体更大 */
+      padding: 15px;
+      margin: 15px auto;
+      width: 90%;
+      max-width: 400px;
+      display: block;
+      border-radius: 8px;
+      border: 1.5px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a049;
     }
     #status {
-      margin-top: 20px;
+      margin-top: 25px;
       color: green;
       font-weight: bold;
+      font-size: 20px;
     }
   </style>
 </head>
 <body>
   <h1>📍 Enviar mi ubicación</h1>
-  <input type="text" id="phone" placeholder="Tu número de teléfono">
-  <br>
+  <input type="text" id="phone" placeholder="Tu número de teléfono" />
   <button onclick="sendLocation()">Enviar ubicación</button>
   <div id="status"></div>
 
