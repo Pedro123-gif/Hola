@@ -2,48 +2,51 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Recolector de Ubicación</title>
+  <title>Recolector de Ubicación con Teléfono</title>
 </head>
 <body>
-  <h2>Por favor, permita que accedamos a su ubicación</h2>
-  <div id="status">Esperando acción del usuario...</div>
+  <h2>Por favor ingrese su número de teléfono</h2>
+  <input type="tel" id="phone" placeholder="Ej: +54 9 11 1234 5678" />
+  <button id="sendBtn">Enviar ubicación</button>
+  <div id="status"></div>
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZftClU2fE83XBdwPc2CkeI1-WxwkcdJsDu5mGUPfgG5ks4Dq-CTJ3sbfPsnzmP7DpTQ/exec';
 
-    function sendLocation(lat, lng) {
-      fetch(`${SCRIPT_URL}?lat=${lat}&lng=${lng}`)
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('status').textContent = '¡Ubicación enviada con éxito! ¡Gracias!';
-        })
-        .catch(err => {
-          document.getElementById('status').textContent = 'Error al enviar, por favor intente más tarde.';
-          console.error(err);
-        });
-    }
-
-    function requestLocation() {
+    document.getElementById('sendBtn').addEventListener('click', () => {
+      const phone = document.getElementById('phone').value.trim();
+      if (!phone) {
+        alert('Por favor, ingrese su número de teléfono.');
+        return;
+      }
       if (!navigator.geolocation) {
         document.getElementById('status').textContent = 'Su navegador no soporta la función de ubicación.';
         return;
       }
+      document.getElementById('status').textContent = 'Solicitando ubicación...';
 
       navigator.geolocation.getCurrentPosition(
         position => {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
           document.getElementById('status').textContent = `Ubicación obtenida: ${lat}, ${lng}. Enviando...`;
-          sendLocation(lat, lng);
+
+          fetch(`${SCRIPT_URL}?phone=${encodeURIComponent(phone)}&lat=${lat}&lng=${lng}`)
+            .then(response => response.text())
+            .then(data => {
+              document.getElementById('status').textContent = '¡Ubicación enviada con éxito! ¡Gracias!';
+            })
+            .catch(err => {
+              document.getElementById('status').textContent = 'Error al enviar, por favor intente más tarde.';
+              console.error(err);
+            });
         },
         error => {
           document.getElementById('status').textContent = 'Usuario negó el acceso a la ubicación o ocurrió un error.';
           console.error(error);
         }
       );
-    }
-
-    requestLocation();
+    });
   </script>
 </body>
 </html>
