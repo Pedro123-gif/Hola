@@ -12,11 +12,11 @@
       background-color: #f5f5f5;
     }
     h1 {
-      font-size: 36px;  /* 标题更大 */
+      font-size: 36px;
       margin-bottom: 30px;
     }
     input, button {
-      font-size: 22px;  /* 输入框和按钮字体更大 */
+      font-size: 22px;
       padding: 15px;
       margin: 15px auto;
       width: 90%;
@@ -33,12 +33,15 @@
       font-weight: bold;
       transition: background-color 0.3s ease;
     }
-    button:hover {
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+    button:hover:enabled {
       background-color: #45a049;
     }
     #status {
       margin-top: 25px;
-      color: green;
       font-weight: bold;
       font-size: 20px;
     }
@@ -52,7 +55,6 @@
       margin: 20px auto;
       width: 90%;
       max-width: 400px;
-      font-family: sans-serif;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       text-align: left;
       line-height: 1.4;
@@ -62,7 +64,7 @@
 <body>
   <h1>📍 Enviar mi ubicación</h1>
   <input type="text" id="phone" placeholder="Tu número de teléfono" />
-  <button onclick="sendLocation()">Enviar ubicación</button>
+  <button id="sendBtn" onclick="sendLocation()">Enviar ubicación</button>
   <div id="status"></div>
 
   <div id="ubicacion-alerta">
@@ -79,6 +81,8 @@
       const phone = document.getElementById('phone').value.trim();
       const statusDiv = document.getElementById('status');
       const alertaDiv = document.getElementById('ubicacion-alerta');
+      const button = document.getElementById('sendBtn');
+
       statusDiv.innerText = "";
       alertaDiv.style.display = "none";
 
@@ -92,6 +96,10 @@
         return;
       }
 
+      button.disabled = true;
+      button.innerText = "Enviando...";
+      button.style.backgroundColor = "#999";
+
       navigator.geolocation.getCurrentPosition(position => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
@@ -100,10 +108,15 @@
           .then(response => response.text())
           .then(result => {
             statusDiv.innerText = "✅ Ubicación enviada con éxito.";
+            button.innerText = "✅ Enviado";
+            button.style.backgroundColor = "#2196F3";  // 蓝色
           })
           .catch(error => {
             statusDiv.innerText = "❌ Error al enviar los datos.";
             console.error(error);
+            button.disabled = false;
+            button.innerText = "Reintentar";
+            button.style.backgroundColor = "#f44336";  // 红色
           });
 
       }, error => {
@@ -112,6 +125,9 @@
         } else {
           alert("No se pudo obtener la ubicación. Asegúrate de permitir el acceso.");
         }
+        button.disabled = false;
+        button.innerText = "Enviar ubicación";
+        button.style.backgroundColor = "#4CAF50";
       });
     }
 
