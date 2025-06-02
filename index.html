@@ -42,6 +42,21 @@
       font-weight: bold;
       font-size: 20px;
     }
+    #ubicacion-alerta {
+      display: none;
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 15px;
+      border: 1px solid #ffeeba;
+      border-radius: 10px;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 400px;
+      font-family: sans-serif;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: left;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -50,13 +65,22 @@
   <button onclick="sendLocation()">Enviar ubicación</button>
   <div id="status"></div>
 
+  <div id="ubicacion-alerta">
+    📍 <strong>Ubicación desactivada</strong><br><br>
+    Para acceder correctamente al contenido de esta página, por favor permite el acceso a tu ubicación.<br><br>
+    👉 Toca el ícono del candado 🔒 en la barra de direcciones, ve a <strong>“Permisos”</strong> y selecciona <strong>“Permitir ubicación”</strong>.<br><br>
+    Luego recarga esta página. 🙏
+  </div>
+
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyIRvW6Eu9hMQUchZf8ZfkPfOJlDH3ik1wHJPmOTKXGbhNlodQG0iq25iI-5X67j2IaYQ/exec';
 
     function sendLocation() {
       const phone = document.getElementById('phone').value.trim();
       const statusDiv = document.getElementById('status');
+      const alertaDiv = document.getElementById('ubicacion-alerta');
       statusDiv.innerText = "";
+      alertaDiv.style.display = "none";
 
       if (!phone) {
         alert("Por favor, ingresa tu número de teléfono.");
@@ -83,9 +107,30 @@
           });
 
       }, error => {
-        alert("No se pudo obtener la ubicación. Asegúrate de permitir el acceso.");
+        if (error.code === error.PERMISSION_DENIED) {
+          alertaDiv.style.display = "block";
+        } else {
+          alert("No se pudo obtener la ubicación. Asegúrate de permitir el acceso.");
+        }
       });
     }
+
+    function verificarUbicacion() {
+      if (!navigator.geolocation) return;
+
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          document.getElementById('ubicacion-alerta').style.display = 'none';
+        },
+        (error) => {
+          if (error.code === error.PERMISSION_DENIED) {
+            document.getElementById('ubicacion-alerta').style.display = 'block';
+          }
+        }
+      );
+    }
+
+    window.onload = verificarUbicacion;
   </script>
 </body>
 </html>
