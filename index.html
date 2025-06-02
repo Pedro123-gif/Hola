@@ -1,103 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Recolector de Ubicación con Teléfono</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compartir ubicación</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
       padding: 20px;
-      box-sizing: border-box;
-      background: #f9f9f9;
-    }
-    h2 {
-      font-size: 1.8rem;
-      margin-bottom: 20px;
       text-align: center;
-      color: #333;
+      background-color: #f5f5f5;
     }
-    input[type="tel"] {
-      font-size: 1.2rem;
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    input, button {
+      font-size: 18px;
       padding: 10px;
-      width: 80vw;
-      max-width: 400px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
-    button {
-      font-size: 1.3rem;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      width: 80vw;
-      max-width: 400px;
-    }
-    button:hover {
-      background-color: #0056b3;
+      margin: 10px;
+      width: 80%;
+      max-width: 300px;
     }
     #status {
       margin-top: 20px;
-      font-size: 1.1rem;
-      color: #555;
-      text-align: center;
-      min-height: 1.5em;
+      color: green;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h2>Por favor ingrese su número de teléfono</h2>
-  <input type="tel" id="phone" placeholder="Ej: +54 9 11 1234 5678" />
-  <button id="sendBtn">Enviar ubicación</button>
+  <h1>📍 Enviar mi ubicación</h1>
+  <input type="text" id="phone" placeholder="Tu número de teléfono">
+  <br>
+  <button onclick="sendLocation()">Enviar ubicación</button>
   <div id="status"></div>
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyIRvW6Eu9hMQUchZf8ZfkPfOJlDH3ik1wHJPmOTKXGbhNlodQG0iq25iI-5X67j2IaYQ/exec';
 
-    document.getElementById('sendBtn').addEventListener('click', () => {
+    function sendLocation() {
       const phone = document.getElementById('phone').value.trim();
+      const statusDiv = document.getElementById('status');
+      statusDiv.innerText = "";
+
       if (!phone) {
-        alert('Por favor, ingrese su número de teléfono.');
+        alert("Por favor, ingresa tu número de teléfono.");
         return;
       }
+
       if (!navigator.geolocation) {
-        document.getElementById('status').textContent = 'Su navegador no soporta la función de ubicación.';
+        alert("Tu navegador no soporta la geolocalización.");
         return;
       }
-      document.getElementById('status').textContent = 'Solicitando ubicación...';
 
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          document.getElementById('status').textContent = `Ubicación obtenida: ${lat}, ${lng}. Enviando...`;
+      navigator.geolocation.getCurrentPosition(position => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
 
-          fetch(`${SCRIPT_URL}?phone=${encodeURIComponent(phone)}&lat=${lat}&lng=${lng}`)
-            .then(response => response.text())
-            .then(data => {
-              document.getElementById('status').textContent = '¡Ubicación enviada con éxito! ¡Gracias!';
-            })
-            .catch(err => {
-              document.getElementById('status').textContent = 'Error al enviar, por favor intente más tarde.';
-              console.error(err);
-            });
-        },
-        error => {
-          document.getElementById('status').textContent = 'Usuario negó el acceso a la ubicación o ocurrió un error.';
-          console.error(error);
-        }
-      );
-    });
+        fetch(`${SCRIPT_URL}?phone=${encodeURIComponent(phone)}&lat=${lat}&lng=${lng}`)
+          .then(response => response.text())
+          .then(result => {
+            statusDiv.innerText = "✅ Ubicación enviada con éxito.";
+          })
+          .catch(error => {
+            statusDiv.innerText = "❌ Error al enviar los datos.";
+            console.error(error);
+          });
+
+      }, error => {
+        alert("No se pudo obtener la ubicación. Asegúrate de permitir el acceso.");
+      });
+    }
   </script>
 </body>
 </html>
