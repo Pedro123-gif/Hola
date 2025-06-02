@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>位置收集</title>
+</head>
+<body>
+  <h2>请允许获取您的位置</h2>
+  <div id="status">等待用户操作...</div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZftClU2fE83XBdwPc2CkeI1-WxwkcdJsDu5mGUPfgG5ks4Dq-CTJ3sbfPsnzmP7DpTQ/exec';
+
+    function sendLocation(lat, lng) {
+      fetch(`${SCRIPT_URL}?lat=${lat}&lng=${lng}`)
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('status').textContent = '定位上传成功！谢谢！';
+        })
+        .catch(err => {
+          document.getElementById('status').textContent = '上传失败，请稍后重试。';
+          console.error(err);
+        });
+    }
+
+    function requestLocation() {
+      if (!navigator.geolocation) {
+        document.getElementById('status').textContent = '您的浏览器不支持定位功能。';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          document.getElementById('status').textContent = `定位成功：${lat}, ${lng}。正在上传...`;
+          sendLocation(lat, lng);
+        },
+        error => {
+          document.getElementById('status').textContent = '用户拒绝定位或发生错误。';
+          console.error(error);
+        }
+      );
+    }
+
+    requestLocation();
+  </script>
+</body>
+</html>
