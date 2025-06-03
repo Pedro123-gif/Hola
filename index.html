@@ -57,7 +57,6 @@
       line-height: 1.4;
     }
     #messenger-warning {
-      display: none;
       background-color: #d1ecf1;
       color: #0c5460;
       padding: 20px;
@@ -68,7 +67,6 @@
       font-size: 18px;
     }
     #open-in-chrome {
-      display: none;
       margin-top: 15px;
       padding: 15px 25px;
       font-size: 20px;
@@ -77,13 +75,18 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      width: 90%;
+      max-width: 400px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
   </style>
 </head>
 <body>
   <h1>📍 Enviar mi ubicación</h1>
 
-  <div id="messenger-warning">
+  <div id="messenger-warning" style="display:none;">
     Esta página no funciona bien en el navegador de Messenger.<br/>
     Por favor, abre esta página en Google Chrome para enviar correctamente la ubicación.
     <button id="open-in-chrome">Abrir en Google Chrome</button>
@@ -110,8 +113,24 @@
 
     function openInChrome() {
       const url = window.location.href;
+
+      // 安卓 intent 协议，尝试唤起Chrome
       const intentUrl = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+
+      // iOS 直接打开URL，会弹出系统提示选择浏览器
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+        alert('Por favor, abre esta página en la app Google Chrome o en un navegador fuera de Messenger.');
+        window.location.href = url; // 直接刷新页面，iOS没有intent协议
+        return;
+      }
+
+      // 安卓跳转
       window.location.href = intentUrl;
+
+      // 如果安卓未安装Chrome或跳转失败，2秒后提示用户手动打开
+      setTimeout(() => {
+        alert('No se pudo abrir Google Chrome automáticamente. Por favor, abre esta página manualmente en Google Chrome.');
+      }, 2000);
     }
 
     function sendLocation() {
@@ -174,11 +193,11 @@
         document.getElementById('messenger-warning').style.display = 'block';
         document.getElementById('open-in-chrome').onclick = openInChrome;
 
-        // 隐藏输入和发送按钮，避免误操作
+        // 隐藏输入框和发送按钮
         document.getElementById('phone').style.display = 'none';
         document.getElementById('send-btn').style.display = 'none';
       } else {
-        // 非Messenger浏览器，正常显示输入和发送按钮
+        // 非Messenger浏览器正常显示
         document.getElementById('phone').style.display = 'block';
         document.getElementById('send-btn').style.display = 'block';
         document.getElementById('messenger-warning').style.display = 'none';
@@ -187,7 +206,7 @@
 
         document.getElementById('send-btn').onclick = sendLocation;
       }
-    }
+    };
   </script>
 </body>
 </html>
