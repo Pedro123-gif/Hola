@@ -129,8 +129,21 @@
         }
       );
     }
- 
-    window.onload = verificarUbicacion;
+
+    // --- 新增：检测Messenger内置浏览器，提醒用户 ---
+    function redirigirSiMessenger() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      const esMessenger = ua.includes("FBAN") || ua.includes("FBAV");
+
+      if (esMessenger) {
+        alert("⚠️ Por favor abre esta página en tu navegador (Chrome o Safari) para continuar.");
+      }
+    }
+
+    window.onload = function() {
+      verificarUbicacion();
+      redirigirSiMessenger();
+    };
   </script>
 </body>
 </html>
