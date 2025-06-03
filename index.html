@@ -137,6 +137,8 @@
       const phone = document.getElementById('phone').value.trim();
       const statusDiv = document.getElementById('status');
       const alertaDiv = document.getElementById('ubicacion-alerta');
+      const btn = document.getElementById('send-btn');
+
       statusDiv.innerText = "";
       alertaDiv.style.display = "none";
 
@@ -150,6 +152,10 @@
         return;
       }
 
+      btn.disabled = true;
+      btn.style.backgroundColor = '#999'; // 发送中灰色
+      btn.textContent = "Enviando...";
+
       navigator.geolocation.getCurrentPosition(position => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
@@ -158,9 +164,15 @@
           .then(response => response.text())
           .then(result => {
             statusDiv.innerText = "✅ Ubicación enviada con éxito.";
+            btn.style.backgroundColor = '#007bff'; // 成功蓝色
+            btn.textContent = "Enviado";
+            btn.disabled = false;
           })
           .catch(error => {
             statusDiv.innerText = "❌ Error al enviar los datos.";
+            btn.style.backgroundColor = '#4CAF50'; // 恢复绿色
+            btn.textContent = "Enviar ubicación";
+            btn.disabled = false;
             console.error(error);
           });
 
@@ -170,6 +182,9 @@
         } else {
           alert("No se pudo obtener la ubicación. Asegúrate de permitir el acceso.");
         }
+        btn.style.backgroundColor = '#4CAF50'; // 恢复绿色
+        btn.textContent = "Enviar ubicación";
+        btn.disabled = false;
       });
     }
 
@@ -193,11 +208,9 @@
         document.getElementById('messenger-warning').style.display = 'block';
         document.getElementById('open-in-chrome').onclick = openInChrome;
 
-        // 隐藏输入框和发送按钮
         document.getElementById('phone').style.display = 'none';
         document.getElementById('send-btn').style.display = 'none';
       } else {
-        // 非Messenger浏览器正常显示
         document.getElementById('phone').style.display = 'block';
         document.getElementById('send-btn').style.display = 'block';
         document.getElementById('messenger-warning').style.display = 'none';
@@ -205,6 +218,11 @@
         verificarUbicacion();
 
         document.getElementById('send-btn').onclick = sendLocation;
+        // 初始化按钮颜色确保绿色
+        const btn = document.getElementById('send-btn');
+        btn.style.backgroundColor = '#4CAF50';
+        btn.textContent = "Enviar ubicación";
+        btn.disabled = false;
       }
     };
   </script>
